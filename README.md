@@ -14,6 +14,23 @@ Here's an example of what you can do when it's connected to Claude.
 
 > *Caution:* as with many MCP servers, the WhatsApp MCP is subject to [the lethal trifecta](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/). This means that project injection could lead to private data exfiltration.
 
+## Note on this fork
+
+The upstream repo ([lharries/whatsapp-mcp](https://github.com/lharries/whatsapp-mcp)) hadn't been
+updated since July 2025, and its pinned `go.mau.fi/whatsmeow` dependency had aged out: WhatsApp's
+servers reject outdated client versions outright with `Client outdated (405) connect failure`.
+
+This fork updates `whatsmeow` to the latest version and adapts the 5 call sites whose API picked up
+a new leading `context.Context` parameter since July 2025 (`client.Download`, `sqlstore.New`,
+`container.GetFirstDevice`, `client.GetGroupInfo`, `client.Store.Contacts.GetContact`). No other
+behavior changes — follow the installation steps below as-is, you don't need to touch `go.mod`
+yourself first.
+
+If WhatsApp's protocol has moved again by the time you read this and you hit the same `405` error,
+re-run `go get -u go.mau.fi/whatsmeow@latest && go mod tidy` in `whatsapp-bridge/` before building,
+then fix any new compile errors the same way (adding `context.Background()` as the first argument
+wherever the compiler complains).
+
 ## Installation
 
 ### Prerequisites
